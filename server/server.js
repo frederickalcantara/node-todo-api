@@ -1,3 +1,4 @@
+const _ = require("lodash");
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
@@ -76,6 +77,36 @@ app.delete('/todos/:id', (req, res) => {
     .catch((e) => {
       res.status(400).send();
     });
+});
+
+app.patch('/todos/:id', (req,res) => {
+  let id = req.params.id;
+  let body = _.pick(req.body, ['text', 'completed']);
+  // Subset things user has put in, we don't want the user to update anything they choose.
+  // Using the pick function allows us to choose which properties can a user update
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send("ID isn't found");
+  }
+
+  if (_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null;
+  }
+  // Update the completedAt property with the completed property
+
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+    // Updates the properties
+    if (!todo) {
+      return res.status(404).send();
+    }
+
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  })
 });
 
 app.listen(port, () => {
