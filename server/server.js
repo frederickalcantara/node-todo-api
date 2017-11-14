@@ -29,7 +29,7 @@ app.get('/todos', (req, res) => {
     // Using an object for res.send allows for more flexibilty if you want to add on more properties instead of using an array
   }, (e) => {
     res.status(400).send(e);
-  })
+  });
 });
 
 app.listen(3000, () => {
