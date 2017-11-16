@@ -1,28 +1,61 @@
-let mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const validator = require("validator");
+const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
-// User
-// email - require it - trim it - set type - set minlength of 1
-
-let User = mongoose.model("User", {
+let UserSchema = new mongoose.Schema({
   email: {
     type: String,
-    required: true,
+    trim: true,
     minlength: 1,
-    trim: true
-  }
+    unique: true,
+    validate: {
+      validator: validator.isEmail,
+      message: `{value} is not a valid email`
+    }
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
+  tokens: [
+    {
+      access: {
+        type: String,
+        required: true
+      },
+      token: {
+        type: String,
+        required: true
+      }
+    }
+  ]
 });
 
-// let newUser = new User({
-//   email: "frederickaalcantara@gmail.com"
-// });
+UserSchema.methods.toJSON = function () {
+  let user = this;
+  let userObject = user.toObject();
 
-// newUser.save().then(
-//   doc => {
-//     console.log(JSON.stringify(doc, undefined, 2));
-//   },
-//   e => {
-//     console.log("Unable to save todo", e);
-//   }
-// );
+  return _.pick(userObject, ['_id', 'email']);
+};
 
-module.exports = {User};
+UserSchema.methods.generateAuthToken = function () {
+  let user = this;
+  let access = 'auth';
+  let token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
+
+  user.tokens.push({access, token});
+
+  return user.save().then(() => {
+    return token;
+  })
+};
+
+let User = mongoose.model("User", UserSchema);
+
+module.exports = {
+  User
+};
+
+// tokens is only available in mongodb
