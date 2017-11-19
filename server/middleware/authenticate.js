@@ -10,7 +10,7 @@ let authenticate = (req, res, next) => {
         return Promise.reject();
       }
 
-      req.user = user;
+    req.user = user;
 	  req.token = token;
 	  next();
     })

@@ -66,8 +66,7 @@ app.get('/todos/:id', authenticate, (req, res) => {
     });
 });
 
-app.delete('/todos/:id', authenticate, (req, res) => {
-
+app.delete("/todos/:id", authenticate, (req, res) => {
   let id = req.params.id;
 
   if (!ObjectID.isValid(id)) {
@@ -78,27 +77,24 @@ app.delete('/todos/:id', authenticate, (req, res) => {
     _id: id,
     _creator: req.user._id
   })
-    .then((todo) => {
+    .then(todo => {
       if (!todo) {
         return res.status(404).send("ID is not found");
       }
 
-      res.send({todo});
-      console.log('Todo by Id');
+      res.send({ todo });
+      console.log("Todo by Id");
     })
-    .catch((e) => {
+    .catch(e => {
       res.status(400).send();
     });
 });
-
-app.patch('/todos/:id', authenticate, (req,res) => {
+app.patch("/todos/:id", authenticate, (req, res) => {
   let id = req.params.id;
-  let body = _.pick(req.body, ['text', 'completed']);
-  // Subset things user has put in, we don't want the user to update anything they choose.
-  // Using the pick function allows us to choose which properties can a user update
+  let body = _.pick(req.body, ["text", "completed"]);
 
   if (!ObjectID.isValid(id)) {
-    return res.status(404).send("ID isn't found");
+    return res.status(404).send();
   }
 
   if (_.isBoolean(body.completed) && body.completed) {
@@ -108,20 +104,21 @@ app.patch('/todos/:id', authenticate, (req,res) => {
     body.completedAt = null;
   }
   // Update the completedAt property with the completed property
+  Todo.findOneAndUpdate(
+    { _id: id, _creator: req.user._id},
+    { $set: body },
+    { new: true }
+  ).then(todo => {
+      // Updates the properties
+      if (!todo) {
+        return res.status(404).send();
+      }
 
-  Todo.findByOneAndUpdate({
-    _id: id,
-    _creator: req.user._id
-  }, {$set: body}, {new: true}).then((todo) => {
-    // Updates the properties
-    if (!todo) {
-      return res.status(404).send();
-    }
-
-    res.send({todo});
-  }).catch((e) => {
-    res.status(400).send();
-  })
+      res.send({ todo });
+    })
+    .catch(e => {
+      res.status(400).send();
+    });
 });
 
 // POST /users

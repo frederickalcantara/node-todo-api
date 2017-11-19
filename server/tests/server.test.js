@@ -5,7 +5,7 @@ const { ObjectID } = require('mongodb');
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 const {User} = require('./../models/user');
-const {todos, populateTodos, users, populateUsers} = require('./seed/seed');
+const { todos, populateTodos, users, populateUsers } = require("./seed/seed");
 
 beforeEach(populateUsers);
 beforeEach(populateTodos);
@@ -174,6 +174,7 @@ describe('DELETE /todos/:id', () => {
 	});
 });
 
+
 describe('PATCH /todos/:id', () => {
 	it('Should update the todo', (done) => {
 		// grab id of first item
@@ -191,10 +192,6 @@ describe('PATCH /todos/:id', () => {
 				expect(res.body.todo.completedAt).toBeA("number");
 			})
 			.end(done);
-
-		// update text, set completed to true
-		// expect 200
-		// expect res.body has text property equal to text, completed is true, completed at is a number .toBeA
 	});
 
 	it("Should not update the todo from another user", done => {
@@ -205,7 +202,7 @@ describe('PATCH /todos/:id', () => {
 		request(app)
 			.patch(`/todos/${hexId}`)
 			.set("x-auth", users[1].tokens[0].token)
-			.send({ completed: true, text })
+			.send({ completed: false, text })
 			.expect(404)
 			.end(done);
 	});
@@ -228,6 +225,7 @@ describe('PATCH /todos/:id', () => {
 			.end(done);
 	});
 });
+
 
 describe('GET /users/me', () => {
 	it('Should return user if authenticated', (done) => {
