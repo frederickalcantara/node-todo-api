@@ -14,18 +14,14 @@ let Todo = mongoose.model('Todo', {
 	completedAt: {
 		type: Number,
 		default: null
+	},
+	_creator: {
+		type: mongoose.Schema.Types.ObjectId,
+		required: true
 	}
 });
 
-// let otherTodo = new Todo({
-// 	text: '   Edit this video    '
-// });
-
-// otherTodo.save().then((doc) => {
-// 	console.log(JSON.stringify(doc, undefined, 2));
-// }, (e) => {
-// 	console.log('Unable to save todo', e);
-// });
+// _creator sets a unique todo based on the id
 
 // Type casting does exist in mongoose
 
