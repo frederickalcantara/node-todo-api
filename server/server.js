@@ -143,15 +143,18 @@ app.get("/users/me", authenticate, (req, res) => {
 
 // POST /users/login {email, password}
 app.post("/users/login", (req, res) => {
-  let body = _.pick(req.body, ["email", "password"]);
+  var body = _.pick(req.body, ["email", "password"]);
 
-  User.findByCredentials(body.email, body.password).then((user) => {
-    return user.generateAuthToken().then((token) => {
-      res.header('x-auth', token).send(user);
+  User.findByCredentials(body.email, body.password)
+    .then(user => {
+      return user.generateAuthToken().then(token => {
+        res.header("x-auth", token).send(user);
+      });
+    })
+    .catch(e => {
+      console.log(e);
+      res.status(400).send();
     });
-  }).catch((e) => {
-    res.status(400).send();
-  });
 });
 
 app.delete('/users/me/token', authenticate, (req, res) => {
